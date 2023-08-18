@@ -20,7 +20,7 @@ AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
 AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_KEY") or "mykey"
 AZURE_OPENAI_SERVICE = os.environ.get("AZURE_OPENAI_SERVICE") or "myopenai"
 AZURE_OPENAI_CHATGPT_DEPLOYMENT = os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
-
+AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY") or "mykey"
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "content"
 KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
 KB_FIELDS_SOURCEPAGE = os.environ.get("KB_FIELDS_SOURCEPAGE") or "sourcepage"
@@ -57,8 +57,8 @@ openai.api_version = "2022-12-01"
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
 openai.api_type = "azure"
-openai_token = config('AZURE_OPENAI_KEY')   # azure_credential.get_token("https://cognitiveservices.azure.com/.default")
-openai.api_key = openai_token   # openai_token.token
+# openai_token = config('AZURE_OPENAI_KEY')   # azure_credential.get_token("https://cognitiveservices.azure.com/.default")
+openai.api_key = AZURE_OPENAI_KEY   # openai_token.token
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
