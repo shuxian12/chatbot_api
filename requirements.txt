@@ -1,6 +1,7 @@
 azure-core==1.27.1
 azure-identity==1.13.0
 azure-search-documents==11.4.0b6
+azure_storage==0.37.0
 Flask==2.2.5
 Flask_Cors==4.0.0
 openai==0.27.8
