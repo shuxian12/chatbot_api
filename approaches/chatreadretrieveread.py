@@ -1,6 +1,7 @@
 from typing import Any, Sequence
 
 import openai
+from openai import error
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType
 from approaches.approach import Approach
@@ -110,16 +111,21 @@ Search query:
             prompt = prompt_override.format(sources=content, chat_history=self.get_chat_history_as_text(history), follow_up_questions_prompt=follow_up_questions_prompt)
 
         # STEP 3: Generate a contextual and content specific answer using the search results and chat history
-        completion = openai.Completion.create(
-            engine=self.chatgpt_deployment, 
-            prompt=prompt, 
-            temperature=overrides.get("temperature") or 0.7, 
-            max_tokens=1024, 
-            n=1, 
-            stop=["<|im_end|>", "<|im_start|>"],
-            timeout=30,
-            request_timeout=30)
-        return {"data_points": results, "answer": completion.choices[0].text, "thoughts": f"Searched for:<br>{q}<br><br>Prompt:<br>" + prompt.replace('\n', '<br>')}
+        try:
+            completion = openai.Completion.create(
+                engine=self.chatgpt_deployment, 
+                prompt=prompt, 
+                temperature=overrides.get("temperature") or 0.7, 
+                max_tokens=1024, 
+                n=1, 
+                stop=["<|im_end|>", "<|im_start|>"],
+                timeout=30,
+                request_timeout=30)
+            ans = completion.choices[0].text
+        except error.InvalidRequestError as e:
+            ans = 'Sorry I can\'t answer that question due to some invalid, dangerous, or otherwise harmful content.\nPlease try again with a different question related to the advantech products and services. I will be happy to help you.'
+
+        return {"data_points": results, "answer": ans, "thoughts": f"Searched for:<br>{q}<br><br>Prompt:<br>" + prompt.replace('\n', '<br>')}
     
     def get_chat_history_as_text(self, history: Sequence[dict[str, str]], include_last_turn: bool=True, approx_max_tokens: int=1000) -> str:
         history_text = ""
