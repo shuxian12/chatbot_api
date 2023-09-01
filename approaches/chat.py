@@ -62,10 +62,10 @@ If you cannot generate a search query, return just the number 0.
         self.sourcepage_field = sourcepage_field
         self.content_field = content_field
         self.chatgpt_token_limit = get_token_limit(self.chatgpt_model)
-        openai.api_base = f'https://{config("AZURE_OPENAI_GPT4_SERVICE")}.openai.azure.com/'
-        openai.api_key = config('AZURE_OPENAI_GPT4_KEY')
 
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+        openai.api_base = f'https://{config("AZURE_OPENAI_GPT4_SERVICE")}.openai.azure.com/'
+        openai.api_key = config('AZURE_OPENAI_GPT4_KEY')
         has_text = overrides.get("retrieval_mode") in ["text", "hybrid", None]
         has_vector = False #overrides.get("retrieval_mode") in ["vectors", "hybrid", None]
         use_semantic_captions = True if overrides.get("semantic_captions") and has_text else False

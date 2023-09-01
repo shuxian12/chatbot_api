@@ -1,4 +1,5 @@
 from typing import Any, Sequence
+from decouple import config
 
 import openai
 from openai import error
@@ -64,6 +65,8 @@ Search query:
         top = overrides.get("top") or 3
         exclude_category = overrides.get("exclude_category") or None
         filter = "category ne '{}'".format(exclude_category.replace("'", "''")) if exclude_category else None
+        openai.api_base = f"https://{config('AZURE_OPENAI_SERVICE')}.openai.azure.com"
+        openai.api_key = config("AZURE_OPENAI_KEY")
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         prompt = self.query_prompt_template.format(chat_history=self.get_chat_history_as_text(history, include_last_turn=False), question=history[-1]["user"])

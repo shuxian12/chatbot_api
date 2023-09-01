@@ -111,6 +111,7 @@ def content_file(path):
 @retry((TimeoutError, error.Timeout), logger=logging.getLogger(__name__), delay=2)
 @timeout(40)
 def run_chat(request: dict, impl):
+    print('run_chat' , impl)
     r = impl.run(request["history"], request.get("overrides") or {})
     return r
 
