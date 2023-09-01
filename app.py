@@ -6,11 +6,11 @@ import mimetypes
 from flask_cors import CORS
 from decouple import config
 from flask import Flask, request, jsonify, send_file, abort
-from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.storage.blob import BlobServiceClient
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.chat import ChatReadRetrieveReadApproach as ChatGPT4
 from retry import retry
 from wrapt_timeout_decorator import timeout
 from openai import error
@@ -62,12 +62,11 @@ azure_credential_search = AzureKeyCredential(AZURE_SEARCH_SERVICE_KEY)
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
-openai.api_version = "2022-12-01"
+openai.api_version = "2023-05-15"
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
 openai.api_type = "azure"
-# openai_token = config('AZURE_OPENAI_KEY')   # azure_credential.get_token("https://cognitiveservices.azure.com/.default")
-openai.api_key = AZURE_OPENAI_KEY   # openai_token.token
+openai.api_key = AZURE_OPENAI_KEY
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
@@ -81,7 +80,8 @@ blob_client = BlobServiceClient(
 blob_container = blob_client.get_container_client(AZURE_STORAGE_CONTAINER)
 
 chat_approaches = {
-    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_CHATGPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT)
+    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_CHATGPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT),
+    "gpt4": ChatGPT4(search_client, AZURE_OPENAI_CHATGPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT)
 }
 
 app = Flask(__name__)
@@ -110,7 +110,7 @@ def content_file(path):
 
 @retry((TimeoutError, error.Timeout), logger=logging.getLogger(__name__), delay=2)
 @timeout(40)
-def run_chat(request: dict, impl: ChatReadRetrieveReadApproach):
+def run_chat(request: dict, impl):
     r = impl.run(request["history"], request.get("overrides") or {})
     return r
 
